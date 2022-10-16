@@ -53,6 +53,7 @@ func main() {
 
 	flag.StringVar(&listenAddr, "listen", "0.0.0.0:9999", "listen addr (format: ip:port, like 0.0.0.0:9999)")
 	flag.StringVar(&remoteAddr, "remote", "", "remote addr to be forwarded (format: ip:port, like 0.0.0.0:9999)")
+	flag.Parse()
 	if remoteAddr == "" {
 		log.Fatal("invalid remote addr")
 	}
