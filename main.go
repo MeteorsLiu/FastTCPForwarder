@@ -13,7 +13,7 @@ import (
 	pool "github.com/MeteorsLiu/go-tcpConnectionPool/v2"
 )
 
-func run(it chan struct{}, is context.Context, remote, local string) {
+func run(it chan struct{}, is context.Context, l net.Listener, remote string) {
 	defer close(it)
 	p, err := pool.New(remote, pool.DefaultOpts())
 	if err != nil {
@@ -22,11 +22,6 @@ func run(it chan struct{}, is context.Context, remote, local string) {
 	w := pool.Wrapper(p)
 	defer w.Close()
 
-	l, err := net.Listen("tcp4", local)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer l.Close()
 	for {
 		c, err := l.Accept()
 		if err != nil {
@@ -59,10 +54,16 @@ func main() {
 	}
 	safeExit := make(chan struct{})
 	isDone, done := context.WithCancel(context.Background())
-	go run(safeExit, isDone, remoteAddr, listenAddr)
+	l, err := net.Listen("tcp4", listenAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go run(safeExit, isDone, l, remoteAddr)
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	<-sigCh
 	done()
+	l.Close()
 	<-safeExit
 }
