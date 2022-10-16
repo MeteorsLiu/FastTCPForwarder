@@ -35,9 +35,9 @@ func run(it chan struct{}, is context.Context, l net.Listener, remote string) {
 		}
 		go func() {
 			go func() {
-				io.Copy(c, w)
+				log.Println(io.Copy(c, w))
 			}()
-			io.Copy(w, c)
+			log.Println(io.Copy(w, c))
 		}()
 	}
 }
